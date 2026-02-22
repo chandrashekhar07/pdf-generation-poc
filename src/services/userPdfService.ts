@@ -1,22 +1,5 @@
-import PDFDocument, { font, opacity } from "pdfkit";
 import { Request, Response } from "express";
-
-type PageSize = "a4";
-type PageOrientation = "portrait";
-
-type RenderOptions = {
-  orientation: PageOrientation;
-  pageSize: PageSize;
-  pageNumbers: boolean;
-  filename: string;
-  margin: number;
-  tableHeaders: {
-    users: Array<{
-      label: string;
-      width: number;
-    }>;
-  };
-};
+import { addPageNumbers, createPDFDocument, RenderOptions, shouldAddNewPage, TextStyles } from "./pdfService";
 
 type UserDetails = {
   id: number;
@@ -24,27 +7,6 @@ type UserDetails = {
   email: string;
   role: string;
   createdAt: string;
-};
-
-const TextStyles = {
-  header: {
-    size: 18,
-    color: "#000000",
-    font: "Helvetica-Bold",
-    opacity: 0.8,
-  },
-  tableRow: {
-    size: 12,
-    color: "#220f0f",
-    font: "Helvetica",
-    opacity: 0.6,
-  },
-  pageNumber: {
-    size: 10,
-    color: "#c81515",
-    font: "Helvetica",
-    opacity: 0.9,
-  },
 };
 
 const DEFAULT_PDF_OPTIONS: RenderOptions = {
@@ -77,40 +39,6 @@ const listOfUsers = Array.from({ length: usersCount }, (_, i) => {
     createdAt: new Date(2026, 0, index).toISOString().slice(0, 10),
   };
 });
-
-const createPDFDocument = (options: RenderOptions): PDFKit.PDFDocument => {
-  const { orientation, pageSize, margin } = options;
-
-  return new PDFDocument({
-    size: pageSize,
-    layout: orientation,
-    margin: margin,
-    bufferPages: true,
-    displayTitle: true,
-  });
-};
-
-const addPageNumbers = (doc: PDFKit.PDFDocument): void => {
-  const { page } = doc;
-  const totalPages = doc.bufferedPageRange().count;
-
-  for (let pageCount = 0; pageCount < totalPages; pageCount++) {
-    doc.switchToPage(pageCount);
-
-    const bottom = page.height - page.margins.bottom - page.margins.top;
-    const usableWidth = page.width - page.margins.left - page.margins.right;
-
-    doc
-      .fontSize(TextStyles.pageNumber.size)
-      .fillColor(TextStyles.pageNumber.color)
-      .font(TextStyles.pageNumber.font)
-      .opacity(TextStyles.pageNumber.opacity)
-      .text(`Page ${pageCount + 1}`, page.margins.left, bottom, {
-        width: usableWidth,
-        align: "center",
-      });
-  }
-};
 
 const addTableHeaders = (
   doc: PDFKit.PDFDocument,
@@ -160,18 +88,6 @@ const addTableRow = (
   });
 };
 
-const shouldAddNewPage = (
-  doc: PDFKit.PDFDocument,
-  rowHeight: number,
-): boolean => {
-  const { page } = doc;
-
-  const currentPosition = doc.y;
-  const pageHeight = page.height - page.margins.top - page.margins.bottom;
-
-  return currentPosition + rowHeight > pageHeight;
-};
-
 const addNewPageIfNeeded = (
   doc: PDFKit.PDFDocument,
   rowHeight: number,
@@ -182,7 +98,7 @@ const addNewPageIfNeeded = (
   }
 };
 
-const renderUserListPdf = async (req: Request, res: Response) => {
+const renderUserListPdf = async (_req: Request, res: Response) => {
   const doc = createPDFDocument(DEFAULT_PDF_OPTIONS);
 
   addTableHeaders(doc, DEFAULT_PDF_OPTIONS.tableHeaders.users);
