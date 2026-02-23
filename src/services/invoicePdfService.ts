@@ -283,7 +283,7 @@ const addInvoiceTableRow = (
 ): void => {
   const rowHeight = 20;
 
-  if (shouldAddNewPage(doc, rowHeight + 20)) {
+  if (shouldAddNewPage(doc, 2 * rowHeight)) {
     doc.addPage();
     addInvoiceTableHeader(doc);
   }
@@ -328,8 +328,6 @@ const addInvoiceTableRow = (
         align: col.align as PDFKit.Mixins.TextOptions["align"],
       });
   });
-
-  doc.y = startY + rowHeight;
 };
 
 const addTotalsSection = (
@@ -400,9 +398,12 @@ const addTotalsSection = (
     });
 };
 
-const renderInvoicePdf = async (_req: Request, res: Response): Promise<void> => {
+const renderInvoicePdf = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
   const doc = createPDFDocument(DEFAULT_INVOICE_PDF_OPTIONS);
-  const invoiceData = generateMockInvoiceData(50);
+  const invoiceData = generateMockInvoiceData(150);
 
   await addLogo(doc);
   addInvoiceInfoHeader(doc, invoiceData);
