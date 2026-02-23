@@ -6,13 +6,13 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
 app.use('/pdf', pdfRoutes);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
   next();

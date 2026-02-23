@@ -1,7 +1,7 @@
-import PDFDocument, { font, opacity } from "pdfkit";
+import PDFDocument from "pdfkit";
 
 type PageSize = "a4";
-type PageOrientation = "portrait";
+type PageOrientation = "portrait" | "landscape";
 
 type RenderOptions = {
   orientation: PageOrientation;

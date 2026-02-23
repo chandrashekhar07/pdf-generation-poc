@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { addPageNumbers, createPDFDocument, RenderOptions, shouldAddNewPage, TextStyles } from "./pdfService";
+import {
+  addPageNumbers,
+  createPDFDocument,
+  RenderOptions,
+  shouldAddNewPage,
+  TextStyles,
+} from "./pdfService";
 
 type UserDetails = {
   id: number;
@@ -26,19 +32,20 @@ const DEFAULT_PDF_OPTIONS: RenderOptions = {
   },
 };
 
-const usersCount = 1001;
-const roles = ["Admin", "Editor", "Viewer"];
-const listOfUsers = Array.from({ length: usersCount }, (_, i) => {
-  const index = i + 1;
+const listOfUsers = (usersCount: number): UserDetails[] => {
+  const roles = ["Admin", "Editor", "Viewer"];
+  return Array.from({ length: usersCount }, (_, i) => {
+    const index = i + 1;
 
-  return {
-    id: index,
-    name: `usr-${index}`,
-    email: `user${index}@example.com`,
-    role: roles[i % roles.length],
-    createdAt: new Date(2026, 0, index).toISOString().slice(0, 10),
-  };
-});
+    return {
+      id: index,
+      name: `usr-${index}`,
+      email: `user${index}@example.com`,
+      role: roles[i % roles.length],
+      createdAt: new Date(2026, 0, index).toISOString().slice(0, 10),
+    };
+  });
+};
 
 const addTableHeaders = (
   doc: PDFKit.PDFDocument,
@@ -103,7 +110,7 @@ const renderUserListPdf = async (_req: Request, res: Response) => {
 
   addTableHeaders(doc, DEFAULT_PDF_OPTIONS.tableHeaders.users);
 
-  listOfUsers.forEach((user) => {
+  listOfUsers(1001).forEach((user) => {
     addTableRow(doc, user, DEFAULT_PDF_OPTIONS.tableHeaders.users);
   });
 
